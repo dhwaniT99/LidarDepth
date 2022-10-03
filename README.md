@@ -1,8 +1,9 @@
 # Capturing Depth Using the LiDAR Camera
 Access the LiDAR camera on supporting devices to capture precise depth data.
 
-#Demo
-<img src="https://media.giphy.com/media/3o6UBpHgaXFDNAuttm/giphy.gif">
+# Demo
+
+<img src="test.gif">
 
 ## Overview
 AVFoundation introduced depth data capture for photos and video in iOS 11. The data it provides is suitable for many apps, but may not meet the needs of those that require greater precision depth. Starting in iOS 15.4, you can access the LiDAR camera on supporting hardware, which offers high-precision depth data suitable for use cases like room scanning and measurement.
