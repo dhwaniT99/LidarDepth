@@ -125,6 +125,7 @@ final class MTKPointCloudCoordinator: MTKCoordinator<MetalPointCloudView> {
         }
         let rotationMatrix: matrix_float4x4 = matrix_float4x4(cameraRotation)
         let pmv = projection * rotationMatrix * translationCamera * translationOrig * orientationOrig
+        
         return pmv
     }
     
