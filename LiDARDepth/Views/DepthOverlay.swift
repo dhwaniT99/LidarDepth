@@ -17,8 +17,8 @@ struct DepthOverlay: View {
     
     var body: some View {
         if manager.dataAvailable {
-            VStack {
-                SliderDepthBoundaryView(val: $opacity, label: "Opacity", minVal: 0, maxVal: 1)
+//            VStack {
+//                SliderDepthBoundaryView(val: $opacity, label: "Opacity", minVal: 0, maxVal: 1)
                 ZStack {
                     MetalTextureViewColor(
                         rotationAngle: rotationAngle,
@@ -32,7 +32,7 @@ struct DepthOverlay: View {
                     )
                         //.opacity(Double(opacity))
                 }
-            }
+//            }
         }
     }
 }

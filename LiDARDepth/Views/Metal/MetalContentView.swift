@@ -106,7 +106,7 @@ class MTKCoordinator<MTKViewRepresentable: MetalRepresentable>: NSObject, MTKVie
     func draw(in view: MTKView) {
         // Override in subclass.
         
-        draw
+//        draw
     }
 }
 
