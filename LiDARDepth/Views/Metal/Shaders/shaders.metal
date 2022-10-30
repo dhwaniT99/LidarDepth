@@ -218,7 +218,7 @@ vertex ParticleVertexInOut pointCloudVertexShader(
     out.clipSpacePosition = vecout;
     out.depth = depth;
     // Set the particle display size.
-    out.pSize = 10.0f;
+    out.pSize = 7.0f;
     
     return out;
 }
@@ -282,7 +282,7 @@ vertex ParticleVertexInOut pointCloudEffectVertexShader(
     out.clipSpacePosition = vecout;
     out.depth = depth;
     // Set the particle display size.
-    out.pSize = 5.0f;
+    out.pSize = 7.0f;
     
     return out;
 }
