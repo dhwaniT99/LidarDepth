@@ -3,17 +3,83 @@ import CoreImage
 
 let context = CIContext()
 var image = UIImage(named: "test.jpeg")!
+
+func convertToGrayScale(image: UIImage) -> UIImage? {
+        let imageRect:CGRect = CGRect(x:0, y:0, width:image.size.width, height: image.size.height)
+        let colorSpace = CGColorSpaceCreateDeviceGray()
+        let width = image.size.width
+        let height = image.size.height
+        let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue)
+        let context = CGContext(data: nil, width: Int(width), height: Int(height), bitsPerComponent: 8, bytesPerRow: 0, space: colorSpace, bitmapInfo: bitmapInfo.rawValue)
+        if let cgImg = image.cgImage {
+            context?.draw(cgImg, in: imageRect)
+            if let makeImg = context?.makeImage() {
+                let imageRef = makeImg
+                let newImage = UIImage(cgImage: imageRef)
+                return newImage
+            }
+        }
+        return UIImage()
+    }
+let grey_image = convertToGrayScale(image: image)!
+
+//func addBlurTo(_ image: UIImage) -> UIImage? {
+//    if let ciImg = CIImage(image: image) {
+//        let ciImg = ciImg.applyingFilter("CIGaussianBlur")
+//        return UIImage(cgImage: ciImg)
+//    }
+//    return nil
+//}
+
 //image = addBlurTo(image)!
-let green_image = image.greenify()
-let inputImage = CIImage(image: green_image)
+
+//let green_image = image.greenify()
+//let inputImage = CIImage(image: green_image)
+let inputImage2 = CIImage(image: image)
+
+func convert(cmage:CIImage) -> UIImage
+{       
+    let context:CIContext = CIContext.init(options: nil)
+    let cgImage:CGImage = context.createCGImage(cmage, from: cmage.extent)!        
+    let image:UIImage = UIImage.init(cgImage: cgImage)        
+    return image
+}
 
 let filter = CIFilter(name: "CIColorThresholdOtsu")
-filter?.setValue(inputImage, forKey: "inputImage")
-let output = filter?.outputImage
+filter?.setValue(inputImage2, forKey: "inputImage")
+let output2 = filter?.outputImage
+var toMask = convert(cmage: output2!)
+//image.greenify()
+print(toMask.cgImage)
+toMask = toMask.greenify()
 
-let new_inputImage = CIImage(image: image)
-filter?.setValue(new_inputImage, forKey: "inputImage")
-let new_output = filter?.outputImage
+func writeImage(_ image: UIImage, name: String) {
+    if name.isEmpty || name.count < 3 {
+        print("Name cannot be empty or less than 3 characters.")
+        return
+    }
+    guard let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+        print("No documents directory found.")
+        return
+    }
+    let imagePath = documentsDirectory.appendingPathComponent("\(name).png")
+    let imagedata = image.jpegData(compressionQuality: 1.0)
+    do {
+        try imagedata?.write(to: imagePath)
+        print("Image successfully written to path:\n\n \(documentsDirectory) \n\n")
+    } catch {
+        print("Error writing image: \(error)")
+    }
+}
+
+writeImage(toMask, name: "export")
+//filter?.setValue(inputImage, forKey: "inputImage")
+//let output = filter?.outputImage
+
+//
+//let new_inputImage = CIImage(image: image)
+//filter?.setValue(new_inputImage, forKey: "inputImage")
+//let new_output = filter?.outputImage
 
 
 extension UIImage {
@@ -27,6 +93,7 @@ extension UIImage {
      */
     func greenify() -> UIImage {
         guard let imageRef = self.cgImage else {
+            print("yes")
             return self
         }
         
@@ -64,18 +131,25 @@ extension UIImage {
         context.draw(imageRef, in: rc)
         var byteIndex = 0
         // Iterate through pixels
-        while byteIndex < bitmapByteCount {
-            if rawData[byteIndex + 1] < 20 {
-                rawData[byteIndex + 1] >>= 1
-            } else {
-                rawData[byteIndex + 1] <<= 1
+        for y in 550 ..< 2450 {
+            for x in 2330 ..< 2800 {
+                let byteIndex = (y * bytesPerRow) + (x * bytesPerPixel)
+                if rawData[byteIndex + 1] < 10 {
+                    rawData[byteIndex] = 255
+                } 
+//                else {
+//                    rawData[byteIndex] = 0
+//                }
             }
+//            
+//        while byteIndex < bitmapByteCount {
+            
 
             
 //            rawData[byteIndex + 0] <<= 1
 //            rawData[byteIndex + 1] <<= 1
 //            rawData[byteIndex + 2] <<= 1
-            byteIndex += 4
+//            byteIndex += 4
         }
         
         // Retrieve image from memory context.
