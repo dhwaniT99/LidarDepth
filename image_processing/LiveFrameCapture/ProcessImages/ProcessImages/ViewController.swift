@@ -11,6 +11,99 @@
 import UIKit
 import AVFoundation
 
+extension UIImage {
+    /**
+    Extracts and highlights the shadows within a region of interest
+     */
+    func highlightShadow() -> UIImage {
+        guard let imageRef = self.cgImage else {
+            return self
+        }
+
+        let width = imageRef.width
+        let height = imageRef.height
+        
+        let bytesPerPixel = 4
+        let bytesPerRow = bytesPerPixel * width
+        let bitmapByteCount = bytesPerRow * height
+        
+        let rawData = UnsafeMutablePointer<UInt8>.allocate(capacity: bitmapByteCount)
+        defer {
+            rawData.deallocate()
+        }
+        
+        guard let colorSpace = CGColorSpace(name: CGColorSpace.genericRGBLinear) else {
+            return self
+        }
+        
+        guard let context = CGContext(
+            data: rawData,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: bytesPerRow,
+            space: colorSpace,
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+                | CGBitmapInfo.byteOrder32Big.rawValue
+        ) else {
+            return self
+        }
+        
+        let rc = CGRect(x: 0, y: 0, width: width, height: height)
+        // Draw source image on created context.
+        context.draw(imageRef, in: rc)
+        var byteIndex = 0
+        // Iterate through pixels
+        for y in 550 ..< 2450 {
+            for x in 2330 ..< 2800 {
+                let byteIndex = (y * bytesPerRow) + (x * bytesPerPixel)
+                if rawData[byteIndex + 1] < 10 {
+                    rawData[byteIndex] = 255
+                } 
+        }
+        
+        // Retrieve image from memory context.
+        guard let image = context.makeImage() else {
+            return self
+        }
+        let result = UIImage(cgImage: image)
+        return result
+    }
+
+    func extractShadow() -> Array<Any> {
+        guard let imageRef = self.cgImage else {
+            return []
+        }
+        var shadowPts = [Any]()
+
+        let width = imageRef.width
+        let height = imageRef.height
+        
+        let bytesPerPixel = 4
+        let bytesPerRow = bytesPerPixel * width
+        let bitmapByteCount = bytesPerRow * height
+        
+        let rawData = UnsafeMutablePointer<UInt8>.allocate(capacity: bitmapByteCount)
+        defer {
+            rawData.deallocate()
+        }
+        
+        guard let colorSpace = CGColorSpace(name: CGColorSpace.genericRGBLinear) else {
+            return []
+        }
+        
+        // Iterate through pixels
+        for y in 550 ..< 2450 {
+            for x in 2330 ..< 2800 {
+                let byteIndex = (y * bytesPerRow) + (x * bytesPerPixel)
+                if rawData[byteIndex + 1] < 10 {
+                    shadowPts.append((x, y))
+                } 
+        }
+        return shadowPts
+    }
+}
+
 class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
     
     private let captureSession = AVCaptureSession()
@@ -122,6 +215,22 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         return nil
     }
     
+    func convert(cmage:CIImage) -> UIImage {       
+        let context:CIContext = CIContext.init(options: nil)
+        let cgImage:CGImage = context.createCGImage(cmage, from: cmage.extent)!        
+        let image:UIImage = UIImage.init(cgImage: cgImage)        
+        return image
+    }
+
+    func extractShadowSegmentation(image: UIImage) -> Array[Any] {
+        let input_image = = CIImage(image: image)
+        let filter = CIFilter(name: "CIColorThresholdOtsu")
+        filter?.setValue(inputImage, forKey: "inputImage")
+        let output = filter?.outputImage
+        let toMask = convert(cmage: output!)
+        return toMask.extractShadow()
+    }
+
     func captureOutput(_ output: AVCaptureOutput,
                        didOutput sampleBuffer: CMSampleBuffer,
                        from connection: AVCaptureConnection) {
