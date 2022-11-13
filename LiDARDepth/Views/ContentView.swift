@@ -38,6 +38,26 @@ struct ContentView: View {
                 Spacer()
             }
             
+            HStack{
+                Text("Brightest Point: ")
+                Text(LocalizedStringKey(String(manager.brightestPoint.0)))
+                Text(LocalizedStringKey(String(manager.brightestPoint.1)))
+            }
+            
+            HStack{
+                Text("Brightest Point 3D: ")
+                Text(LocalizedStringKey(String(manager.brightestPoint3D.0)))
+                Text(LocalizedStringKey(String(manager.brightestPoint3D.1)))
+                Text(LocalizedStringKey(String(manager.brightestPoint3D.2)))
+                Text(LocalizedStringKey(String(manager.brightestPoint3D.3)))
+            }
+            
+            HStack{
+                Text("Image Size: ")
+                Text(LocalizedStringKey(String(manager.imageSize.0)))
+                Text(LocalizedStringKey(String(manager.imageSize.1)))
+            }
+            
             //SliderDepthBoundaryView(val: $maxDepth, label: "Max Depth", minVal: minRangeDepth, maxVal: maxRangeDepth)
             //SliderDepthBoundaryView(val: $minDepth, label: "Min Depth", minVal: minRangeDepth, maxVal: maxRangeDepth)
             
