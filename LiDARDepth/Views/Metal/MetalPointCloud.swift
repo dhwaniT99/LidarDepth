@@ -16,6 +16,9 @@ struct MetalPointCloudView: UIViewRepresentable, MetalRepresentable {
     @Binding var maxDepth: Float
     @Binding var minDepth: Float
     @Binding var scaleMovement: Float
+    // Binding = update display when value updated
+    @Binding var brightestPoint3D: (Float32, Float32, Float32, Float32)
+    @Binding var brightestPoint: (Int, Int)
     
     var capturedData: CameraCapturedData
     
@@ -154,6 +157,8 @@ final class MTKPointCloudCoordinator: MTKCoordinator<MetalPointCloudView> {
         var pmv = calcCurrentPMVMatrix(viewSize: CGSize(width: view.frame.size.width, height: view.frame.size.height))
         encoder.setVertexBytes(&pmv, length: MemoryLayout<matrix_float4x4>.stride, index: 0)
         encoder.setVertexBytes(&cameraIntrinsics, length: MemoryLayout<matrix_float3x3>.stride, index: 1)
+        encoder.setVertexBytes(&parent.brightestPoint3D, length: 4 * MemoryLayout<Float32>.stride, index: 2)
+        encoder.setVertexBytes(&parent.brightestPoint, length: 2 * MemoryLayout<Int>.stride, index: 3)
         encoder.setRenderPipelineState(pipelineState)
         encoder.drawPrimitives(type: .point, vertexStart: 0, vertexCount: Int(depthResolution.x * depthResolution.y))
         encoder.endEncoding()

@@ -111,6 +111,8 @@ struct ContentView: View {
                                 maxDepth: $maxDepth,
                                 minDepth: $minDepth,
                                 scaleMovement: $scaleMovement,
+                                brightestPoint3D: $manager.brightestPoint3D,
+                                brightestPoint: $manager.brightestPoint,
                                 capturedData: manager.capturedData
                             )
                             .aspectRatio(calcAspect(orientation: viewOrientation, texture: manager.capturedData.depth), contentMode: .fit)

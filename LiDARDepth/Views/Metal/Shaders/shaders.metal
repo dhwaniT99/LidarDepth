@@ -182,6 +182,8 @@ vertex ParticleVertexInOut pointCloudVertexShader(
                                                   texture2d<float, access::read> depthTexture [[ texture(0) ]],
                                                   constant float4x4& viewMatrix [[ buffer(0) ]],
                                                   constant float3x3& cameraIntrinsics [[ buffer(1) ]],
+                                                  constant float4& brightestPoint3D [[ buffer(2) ]],
+                                                  constant int2& brightestPoint [[ buffer(3) ]],
                                                   texture2d<half> colorYtexture [[ texture(1) ]],
                                                   texture2d<half> colorCbCrtexture [[ texture(2) ]]
                                                   )
@@ -215,6 +217,13 @@ vertex ParticleVertexInOut pointCloudVertexShader(
     half4 rgbaResult = half4(y + 1.402h * uv.y, y - 0.7141h * uv.y - 0.3441h * uv.x, y + 1.772h * uv.x, 1.0h);
     
     out.color = rgbaResult;
+    if (abs(xrw - brightestPoint3D[0]) <= 5 && abs(yrw - brightestPoint3D[1]) <= 5 && abs(depth - brightestPoint3D[2] <= 5)) {
+        out.color = half4(255, 0, 0, 255);
+    }
+    if (abs(pos.y - brightestPoint[1]) <= 5 && abs(pos.x - brightestPoint[0]) <= 5) {
+        out.color = half4(0, 0, 255, 255);
+    }
+    
     out.clipSpacePosition = vecout;
     out.depth = depth;
     // Set the particle display size.

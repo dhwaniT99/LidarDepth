@@ -156,12 +156,12 @@ class CameraManager: ObservableObject, CaptureDataReceiver {
                 }
             }
             
-            brightestPoint.0 = Int(pointSums.0 / pointCounts)
-            brightestPoint.1 = Int(pointSums.1 / pointCounts)
+            brightestPoint.0 = max(min(Int(pointSums.0 / pointCounts), imageSize.1 - 30) - 30, 0)
+            brightestPoint.1 = max(min(Int(pointSums.1 / pointCounts), imageSize.0 - 30) - 30, 0)
         }
         
         // calculate 3D brightest point center
-        let point = CGPoint(x: max(brightestPoint.0 - 30, 0), y: max(brightestPoint.1 - 30, 0))
+        let point = CGPoint(x: brightestPoint.0, y: brightestPoint.1)
         
         CVPixelBufferLockBaseAddress(self.capturedData.depthMap!, CVPixelBufferLockFlags(rawValue: 0))
         let depthPointer = unsafeBitCast(CVPixelBufferGetBaseAddress(self.capturedData.depthMap!), to: UnsafeMutablePointer<Float16>.self)
