@@ -133,6 +133,7 @@ class CameraManager: ObservableObject, CaptureDataReceiver {
                 fatalError("Couldn't access image data")
             }
             
+            // Actual display seems to show that height and width are flipped?
             imageSize.0 = cgImage.width
             imageSize.1 = cgImage.height
             
@@ -156,11 +157,12 @@ class CameraManager: ObservableObject, CaptureDataReceiver {
                 }
             }
             
-            brightestPoint.0 = max(min(Int(pointSums.0 / pointCounts), imageSize.1 - 30) - 30, 0)
-            brightestPoint.1 = max(min(Int(pointSums.1 / pointCounts), imageSize.0 - 30) - 30, 0)
+            // Offesets to account for changes in image size due to Gaussian blur
+            brightestPoint.0 = max(min(Int(pointSums.0 / pointCounts), imageSize.0 - 30) - 30, 0)
+            brightestPoint.1 = max(min(Int(pointSums.1 / pointCounts), imageSize.1 - 30) - 30, 0)
         }
         
-        // calculate 3D brightest point center
+        // calculate 3D brightest point center - may need to flip x and y?
         let point = CGPoint(x: brightestPoint.0, y: brightestPoint.1)
         
         CVPixelBufferLockBaseAddress(self.capturedData.depthMap!, CVPixelBufferLockFlags(rawValue: 0))
