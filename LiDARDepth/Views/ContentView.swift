@@ -10,6 +10,7 @@ The app's main user interface.
 import SwiftUI
 import MetalKit
 import Metal
+import UIKit
 
 struct ContentView: View {
     
@@ -124,7 +125,14 @@ struct ContentView: View {
                             )
                                 .aspectRatio(calcAspect(orientation: viewOrientation, texture: manager.capturedData.depth), contentMode: .fit)
                         }
+                        ZoomOnTap {
+                            Image(uiImage: manager.shadow)
+                                .resizable()
+                                .rotationEffect(.radians(.pi/2))
+                                .aspectRatio(contentMode: .fit)
+                        }
                     }
+                    
                 }
             }
         }

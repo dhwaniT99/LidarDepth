@@ -10,6 +10,7 @@ import SwiftUI
 import Combine
 import simd
 import AVFoundation
+import UIKit
 
 class CameraManager: ObservableObject, CaptureDataReceiver {
 
@@ -26,6 +27,7 @@ class CameraManager: ObservableObject, CaptureDataReceiver {
     @Published var brightestPoint = (0, 0)
     @Published var brightestPoint3D:(Float, Float, Float, Float) = (0.0, 0.0, 0.0, 0.0)
     @Published var imageSize = (0, 0)
+    @Published var shadow = UIImage()
     
     let controller: CameraController
     var cancellables = Set<AnyCancellable>()
@@ -66,6 +68,7 @@ class CameraManager: ObservableObject, CaptureDataReceiver {
         self.capturedData.ciImage = capturedData.ciImage
         self.capturedData.depthMap = capturedData.depthMap
         getBrightestPoint()
+        highlightShadow()
         waitingForCapture = false
         processingCapturedResult = true
     }
@@ -86,6 +89,14 @@ class CameraManager: ObservableObject, CaptureDataReceiver {
                 }
             }
         }
+    }
+    
+    func highlightShadow() {
+        let ciimage = self.capturedData.ciImage
+        let context = CIContext.init(options: nil)
+        let cgImage = context.createCGImage(ciimage!, from: ciimage!.extent)!
+        let uiimage = UIImage.init(cgImage: cgImage)
+        shadow = uiimage.highlightShadow()
     }
     
     func getBrightestPoint() {
@@ -212,5 +223,101 @@ class CameraCapturedData {
         self.cameraReferenceDimensions = cameraReferenceDimensions
         self.ciImage = ciImage
         self.depthMap = depthMap
+    }
+}
+
+extension UIImage {
+    /**
+     Extracts and highlights the shadows within a region of interest
+     */
+    func highlightShadow() -> UIImage {
+        guard let imageRef = self.cgImage else {
+            return self
+        }
+        
+        let width = imageRef.width
+        let height = imageRef.height
+        
+        let bytesPerPixel = 4
+        let bytesPerRow = bytesPerPixel * width
+        let bitmapByteCount = bytesPerRow * height
+        
+        let rawData = UnsafeMutablePointer<UInt8>.allocate(capacity: bitmapByteCount)
+        defer {
+            rawData.deallocate()
+        }
+        
+        guard let colorSpace = CGColorSpace(name: CGColorSpace.genericRGBLinear) else {
+            return self
+        }
+        
+        guard let context = CGContext(
+            data: rawData,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: bytesPerRow,
+            space: colorSpace,
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            | CGBitmapInfo.byteOrder32Big.rawValue
+        ) else {
+            return self
+        }
+        
+        let rc = CGRect(x: 0, y: 0, width: width, height: height)
+        // Draw source image on created context.
+        context.draw(imageRef, in: rc)
+        //        var byteIndex = 0
+        // Iterate through pixels
+        for y in 0 ..< height {
+            for x in 0 ..< width {
+                let byteIndex = (y * bytesPerRow) + (x * bytesPerPixel)
+                if rawData[byteIndex + 1] < 10 {
+                    rawData[byteIndex] = 255
+                }
+            }
+        }
+        
+        // Retrieve image from memory context.
+        guard let image = context.makeImage() else {
+            return self
+        }
+        let result = UIImage(cgImage: image)
+        return result
+    }
+    
+    
+    func extractShadow() -> Array<Any> {
+        guard let imageRef = self.cgImage else {
+            return []
+        }
+        var shadowPts = [Any]()
+        
+        let width = imageRef.width
+        let height = imageRef.height
+        
+        let bytesPerPixel = 4
+        let bytesPerRow = bytesPerPixel * width
+        let bitmapByteCount = bytesPerRow * height
+        
+        let rawData = UnsafeMutablePointer<UInt8>.allocate(capacity: bitmapByteCount)
+        defer {
+            rawData.deallocate()
+        }
+        
+        //        guard let colorSpace = CGColorSpace(name: CGColorSpace.genericRGBLinear) else {
+        //            return []
+        //        }
+        
+        // Iterate through pixels
+        for y in 550 ..< 2450 {
+            for x in 2330 ..< 2800 {
+                let byteIndex = (y * bytesPerRow) + (x * bytesPerPixel)
+                if rawData[byteIndex + 1] < 10 {
+                    shadowPts.append((x, y))
+                }
+            }
+        }
+        return shadowPts
     }
 }
